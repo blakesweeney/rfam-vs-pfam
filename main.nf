@@ -19,6 +19,8 @@ process fetch_pfam_seed {
 }
 
 process seed_stats {
+  tag { "$source" }
+
   publishDir 'data/', mode: 'copy'
 
   input:
@@ -27,13 +29,11 @@ process seed_stats {
   output:
   tuple val(source), path("${seed}"), emit: seed
   tuple val(source), path("${seed.baseName}.stats.csv"), emit: stats
-  tuple val(source), path("${seed.baseName}.iinfo"), emit: iinfo
   tuple val(source), path("${seed.baseName}.cinfo"), emit: cinfo
 
   """
   esl-alistat \
     --cinfo ${seed.baseName}.cinfo \
-    --iinfo ${seed.baseName}.iinfo \
     -1 \
     $seed \
   | sed 's/# idx/idx/' \
@@ -44,6 +44,8 @@ process seed_stats {
 }
 
 process compute_family_stats {
+  tag { "$source" }
+
   publishDir 'data/', mode: 'copy'
 
   input:
@@ -53,10 +55,8 @@ process compute_family_stats {
   tuple val(source), path("${seed.baseName}.family.csv")
 
   """
-  grep '^#=' ${seed} |\
-  grep -v '^#=GC SS_cons' |\
-  grep -v '^#=GR' |\
-  sed -e 's|#=GF ||' -e 's|#=GC.\\+|\\n|' |\
+  grep '^#=GF\\|//' ${seed} |\
+  sed -e 's|#=GF ||' -e 's|^//|\\n|' |\
   grep -v '^CC' |\
   sed -e 's|DR   \\(\\w\\+\\);|\\1   |' |\
   uniq |\
@@ -70,11 +70,29 @@ process compute_family_stats {
   """
 }
 
+process merge_family_stats {
+  publishDir 'data/', mode: 'copy'
+
+  input:
+  path('raw*.csv')
+
+  output:
+  path('merged.csv')
+
+  """
+  xsv cat rows raw*.csv > merged.csv
+  """
+}
+
 workflow {
-  fetch_pfam_seed()
-  (fetch_rfam_seed) | seed_stats
+  (fetch_rfam_seed & fetch_pfam_seed) \
+  | mix \
+  | seed_stats
 
   seed_stats.out.seed \
   | join(seed_stats.out.stats) \
-  | compute_family_stats
+  | compute_family_stats \
+  | map { source, data -> data } \
+  | collect \
+  | merge_family_stats
 }
