@@ -5,8 +5,10 @@ pkgs.devshell.mkShell {
 
   packages = with pkgs; [
     easel
+    gnused
     infernal
     jdk
+    miller
     wget
     xsv
   ];
