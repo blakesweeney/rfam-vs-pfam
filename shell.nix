@@ -1,4 +1,11 @@
 { pkgs ? import <nixpkgs> {} }:
+let 
+  rEnv = pkgs.rWrapper.override {
+    packages = with pkgs.rPackages; [
+      tidyverse
+    ];
+  };
+in
 pkgs.devshell.mkShell {
   name = "family-stats-shell";
   motd = "";
@@ -9,6 +16,8 @@ pkgs.devshell.mkShell {
     infernal
     jdk
     miller
+    mysql
+    rEnv
     wget
     xsv
   ];

@@ -64,8 +64,8 @@ process compute_family_stats {
   mlr --ixtab --ocsv cut -o -f 'AC,ID,DE,TP' > family.csv
 
   xsv join ID family.csv name $csv \
-  | xsv select 'ID,DE,TP,nseq,nres,small,large,avlen,%id' \
-  | mlr --csv rename 'ID,id,TP,rna_type,DE,description,nseq,number_seqs,nres,number_residues,small,small,large,large,avlen,average_length,%id,percent_identity' \
+  | xsv select 'AC,ID,DE,TP,alen,nseq,nres,small,large,avlen,%id' \
+  | mlr --csv rename 'AC,rfam_acc,ID,id,TP,rna_type,DE,description,alen,number_of_columns,nseq,number_seqs,nres,number_residues,small,small,large,large,avlen,average_length,%id,percent_identity' \
   | mlr --csv put '\$source="$source"' > ${seed.baseName}.family.csv
   """
 }
@@ -84,6 +84,20 @@ process merge_family_stats {
   """
 }
 
+process create_family_plots {
+  publishDir 'plots/', mode: 'copy'
+
+  input:
+  path(merged)
+
+  output:
+  path("*.png")
+
+  """
+  plot.R
+  """
+}
+
 workflow {
   (fetch_rfam_seed & fetch_pfam_seed) \
   | mix \
@@ -94,5 +108,6 @@ workflow {
   | compute_family_stats \
   | map { source, data -> data } \
   | collect \
-  | merge_family_stats
+  | merge_family_stats \
+  | create_family_plots
 }
