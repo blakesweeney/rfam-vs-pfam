@@ -14,6 +14,7 @@ pkgs.devshell.mkShell {
     easel
     gnused
     jdk
+    just
     miller
     rEnv
     wget
