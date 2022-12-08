@@ -1,4 +1,6 @@
 process fetch_rfam_seed {
+  container params.containers.analysis
+
   output:
   tuple val('Rfam seed'), path('rfam.seed')
 
@@ -8,6 +10,8 @@ process fetch_rfam_seed {
 }
 
 process fetch_rfam_structures {
+  container params.containers.analysis
+
   output:
   path('rfam.structures.csv')
 
@@ -20,6 +24,8 @@ process fetch_rfam_structures {
 }
 
 process fetch_pfam_seed {
+  container params.containers.analysis
+
   output:
   tuple val('Pfam seed'), path('pfam.seed')
 
@@ -29,6 +35,8 @@ process fetch_pfam_seed {
 }
 
 process fetch_pfam_full {
+  container params.containers.analysis
+
   output:
   tuple val('Pfam full'), path('pfam.full')
 
@@ -38,6 +46,8 @@ process fetch_pfam_full {
 }
 
 process compute_rfam_structure_counts {
+  container params.containers.analysis
+
   input:
   path(csv)
 
@@ -51,8 +61,9 @@ process compute_rfam_structure_counts {
 }
 
 process alignment_stats {
-  publishDir 'data/', mode: 'copy'
   tag { "$source" }
+  publishDir 'data/', mode: 'copy'
+  container params.containers.analysis
 
   input:
   tuple val(source), path(alignment)
@@ -60,6 +71,9 @@ process alignment_stats {
   output:
   tuple val(source), path("${alignment.baseName}.stats.csv")
 
+  script:
+  /* kind = source.toLowerCase().startsWith('rfam') ? 'rna' : 'amino' */
+  /* esl-alistat --small --${kind} --informat pfam -1 $alignment \ */
   """
   esl-alistat -1 $alignment \
   | sed 's/# idx/idx/' \
@@ -70,8 +84,9 @@ process alignment_stats {
 }
 
 process extract_alignment_info {
-  publishDir 'data/', mode: 'copy'
   tag { "$source" }
+  publishDir 'data/', mode: 'copy'
+  container params.containers.analysis
 
   input:
   tuple val(source), path(alignment)
@@ -91,8 +106,9 @@ process extract_alignment_info {
 }
 
 process combine_stats {
-  publishDir 'data/', mode: 'copy'
   tag { "$source" }
+  publishDir 'data/', mode: 'copy'
+  container params.containers.analysis
 
   input:
   tuple val(source), path(info), path(stats)
@@ -110,6 +126,7 @@ process combine_stats {
 
 process merge_family_stats {
   publishDir 'data/', mode: 'copy'
+  container params.containers.analysis
 
   input:
   path('raw*.csv')
@@ -124,6 +141,7 @@ process merge_family_stats {
 
 process create_family_plots {
   publishDir 'plots/', mode: 'copy'
+  container params.containers.plot
 
   input:
   tuple path(merged), path(rfam_structures)
