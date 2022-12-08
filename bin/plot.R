@@ -2,7 +2,10 @@
 
 library(tidyverse)
 
-data <- read_csv("merged.csv")
+args = commandArgs(trailingOnly=TRUE)
+structures <- read_csv(args[2])
+
+data <- read_csv(args[1])
 
 light_rfam <- "#F7EFEC"
 medium_rfam <- "#A8887B"
@@ -56,6 +59,10 @@ rna_type_df <- data %>%
     mutate(rna_type=fct_reorder(rna_type, count, .desc=TRUE)) %>%
     rename("Number of families"=count) %>%
     pivot_longer(!rna_type, names_to="stat")
+
+with_structures <- data %>% 
+    left_join(structures, by="rfam_acc") %>% 
+    mutate(number_of_structures=replace_na(number_of_structures, 0))
 
 ## Displayed by counts
 family_counts <- rna_type_df %>%
@@ -154,12 +161,6 @@ ggsave("alignment_gaps.png", alignment_gaps, device="png")
 #
 #  grid.arrange(number_residues_p, number_seqs_p, ncol=1)
 
-
-structures <- read_csv("data/rfam.structures.csv", col_names=c("rfam_acc", "number_of_structures"))
-with_structures <- data %>% 
-    left_join(structures, by="rfam_acc") %>% 
-    mutate(number_of_structures=replace_na(number_of_structures, 0))
-
 rna_type_df2 <- with_structures %>%
   	filter(source == 'Rfam seed') %>%
   	select(id, rna_type, number_seqs, number_of_structures) %>%
@@ -172,6 +173,8 @@ rna_type_df2 <- with_structures %>%
 	mutate(rna_type=reorder(rna_type, -families)) %>%
 	pivot_longer(!rna_type, names_to="stat")
 
-ggplot(rna_type_df2, aes(x=reorder(rna_type, -value), y=value)) +
+ structures_plot <- ggplot(rna_type_df2, aes(x=reorder(rna_type, -value), y=value)) +
   	geom_bar(stat="identity") + facet_grid(stat ~ ., scales="free_y") +
   	theme(axis.text.x = element_text(angle = 45, vjust=0.9, hjust=1)) + labs(x="RNA type", y="Count")
+
+ggsave("rfam_structures.png", structures_plot, device="png")
