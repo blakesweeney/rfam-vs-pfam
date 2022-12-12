@@ -15,6 +15,7 @@ pkgs.devshell.mkShell {
     gnused
     jdk
     just
+    infernal
     miller
     rEnv
     wget

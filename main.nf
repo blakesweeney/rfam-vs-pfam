@@ -1,64 +1,5 @@
-process fetch_rfam_seed {
-  container params.containers.analysis
-
-  output:
-  tuple val('Rfam seed'), path('rfam.seed')
-
-  """
-  wget -O - 'https://ftp.ebi.ac.uk/pub/databases/Rfam/14.9/Rfam.seed.gz' | gzip -d > rfam.seed
-  """
-}
-
-process fetch_rfam_structures {
-  container params.containers.analysis
-
-  output:
-  path('rfam.structures.csv')
-
-  """
-  wget -O - 'https://ftp.ebi.ac.uk/pub/databases/Rfam/.preview/pdb_full_region.txt.gz' \
-  | gzip -d \
-  | mlr --itsv --ocsv --implicit-csv-header label rfam_acc,pdb,chain,sequence_start,sequence_stop,bit_score,e_value,cm_start,cm_stop,hexcolor,is_significant \
-  | mlr --csv filter '\$is_significant == "1"' > rfam.structures.csv
-  """
-}
-
-process fetch_pfam_seed {
-  container params.containers.analysis
-
-  output:
-  tuple val('Pfam seed'), path('pfam.seed')
-
-  """
-  wget -O - 'http://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam35.0/Pfam-A.seed.gz' | gzip -d > pfam.seed
-  """
-}
-
-process fetch_pfam_full {
-  container params.containers.analysis
-
-  output:
-  tuple val('Pfam full'), path('pfam.full')
-
-  """
-  wget -O - 'http://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam35.0/Pfam-A.full.gz' | gzip -d > pfam.full
-  """
-}
-
-process compute_rfam_structure_counts {
-  container params.containers.analysis
-
-  input:
-  path(csv)
-
-  output:
-  path("rfam.structure_counts.csv")
-
-  """
-  mlr --csv count -g rfam_acc $csv \
-  | mlr --csv rename 'count,number_of_structures' > rfam.structure_counts.csv
-  """
-}
+include { rfam } from './workflows/rfam'
+/* include { pfam } from './workflows/pfam' */
 
 process alignment_stats {
   tag { "$source" }
@@ -83,7 +24,7 @@ process alignment_stats {
   """
 }
 
-process extract_alignment_info {
+process extract_family_info {
   tag { "$source" }
   publishDir 'data/', mode: 'copy'
   container params.containers.analysis
@@ -155,23 +96,24 @@ process create_family_plots {
 }
 
 workflow {
-  (fetch_rfam_seed & fetch_pfam_seed) \
-  | mix \
-  | set { alignments }
+  rfam()
+  /* (rfam.seeds & pfam.seeds) | mix | set { seed } */
 
-  alignments | alignment_stats | set { stats }
-  alignments | extract_alignment_info | set { info }
+  rfam.out.seeds | set { seed }
 
-  fetch_rfam_structures \
-  | compute_rfam_structure_counts \
-  | set { rfam_structure_counts }
+  /* (rfam.full & pfam.full) | mix | set { full } */
+  rfam.out.full | set { full }
 
-  info \
+  seed | extract_family_info | set { family_info }
+
+  seed.mix(full) | alignment_stats | set { stats }
+
+  family_info \
   | join(stats) \
   | combine_stats \
   | map { source, data -> data } \
   | collect \
   | merge_family_stats \
-  | combine(rfam_structure_counts)
+  | combine(rfam.out.structures)
   | create_family_plots
 }
