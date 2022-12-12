@@ -11,6 +11,7 @@ RUN \
     cd infernal-1.1.4 && \
     ./configure && \
     make && \
+    make install && \
     cd easel && \
     make install
 
