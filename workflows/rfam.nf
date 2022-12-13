@@ -62,7 +62,8 @@ process fetch_all_sequences {
 
 process build_full_alignments {
   tag { "$family" }
-  memory '10GB'
+  memory { 6.GB * params.cmalign.cpus }
+  cpus { params.cmalign.cpus }
   container params.containers.analysis
 
   input:
@@ -72,7 +73,7 @@ process build_full_alignments {
   path("${family}.sto")
 
   """
-  cmalign $cm $fasta > ${family}.sto
+  cmalign --cpu ${params.cmalign.cpus} $cm $fasta > ${family}.sto
   """
 }
 
