@@ -50,13 +50,12 @@ process fetch_all_cms {
 
 process fetch_all_sequences {
   container params.containers.analysis
-  maxForks 20
 
   output:
   path("*.fa")
 
   """
-  wget 'ftp://ftp.ebi.ac.uk/pub/databases/Rfam/${params.rfam.version}/fasta_files/*.fa.gz'
+  wget 'ftp://ftp.ebi.ac.uk/pub/databases/Rfam/${params.rfam.version}/fasta_files/RF*.fa.gz'
   gzip -d *.fa.gz
   """
 }
