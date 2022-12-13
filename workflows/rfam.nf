@@ -2,22 +2,10 @@ process fetch_seed {
   container params.containers.analysis
 
   output:
-  tuple val('Rfam seed'), path('rfam.seed')
+  tuple val('Rfam'), val('seed'), path('rfam.seed')
 
   """
-  wget -O - 'https://ftp.ebi.ac.uk/pub/databases/Rfam/14.9/Rfam.seed.gz' | gzip -d > rfam.seed
-  """
-}
-
-process extract_families {
-  input:
-  path(seed)
-
-  output:
-  path('families.csv')
-
-  """
-  grep '^#=GF AC' ${seed} | awk '{ print \$3 }' > families.csv
+  wget -O - 'https://ftp.ebi.ac.uk/pub/databases/Rfam/${params.rfam.version}/Rfam.seed.gz' | gzip -d > rfam.seed
   """
 }
 
@@ -50,19 +38,26 @@ process compute_structure_counts {
   """
 }
 
-process fetch_full_data {
-  tag { "$family" }
-  container params.containers.analysis
-
-  input:
-  val(family)
-
+process fetch_all_cms {
   output:
-  tuple val(family), path("${family}.cm"), path("${family}.fa")
+  path("*.cm")
 
   """
-  wget -O - 'https://ftp.ebi.ac.uk/pub/databases/Rfam/14.9/fasta_files/${family}.fa.gz' | gzip -d > ${family}.fa
-  wget -O ${family}.cm 'https://rfam.org/family/${family}/cm'
+  wget -O Rfam.tar.gz 'https://ftp.ebi.ac.uk/pub/databases/Rfam/${params.rfam.version}/Rfam.tar.gz'
+  tar xvf Rfam.tar.gz
+  """
+}
+
+process fetch_all_sequences {
+  container params.containers.analysis
+  maxForks 20
+
+  output:
+  path("*.fa")
+
+  """
+  wget 'ftp://ftp.ebi.ac.uk/pub/databases/Rfam/${params.rfam.version}/fasta_files/*.fa.gz'
+  gzip -d *.fa.gz
   """
 }
 
@@ -72,7 +67,7 @@ process build_full_alignments {
   container params.containers.analysis
 
   input:
-  tuple val(family), path(cm), path(fasta)
+  tuple val(family), path(fasta), path(cm)
 
   output:
   path("${family}.sto")
@@ -87,7 +82,7 @@ process combine_full_alignments {
   path("raw*.sto")
 
   output:
-  tuple val('Rfam full'), path('rfam.full')
+  tuple val('Rfam'), val('full'), path('rfam.full')
 
   """
   cat raw*.sto > rfam.full
@@ -98,12 +93,18 @@ workflow rfam {
   main:
     fetch_seed | set { seeds }
 
-    seeds \
-    | map { _, fasta -> fasta } \
-    | extract_families \
-    | splitCsv \
-    | map { it -> it[0] } \
-    | fetch_full_data \
+    fetch_all_cms \
+    | flatten \
+    | map { it -> [it.baseName, it] } \
+    | set { cms }
+
+    fetch_all_sequences \
+    | flatten \
+    | map { it -> [it.baseName, it] } \
+    | set { sequences } 
+
+    sequences
+    | join(cms, failOnMismatch: true) \
     | build_full_alignments \
     | collect \
     | combine_full_alignments \
