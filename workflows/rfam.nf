@@ -65,6 +65,7 @@ process build_full_alignments {
   memory { 6.GB * params.cmalign.cpus }
   cpus { params.cmalign.cpus }
   container params.containers.analysis
+  maxForks 20
 
   input:
   tuple val(family), path(fasta), path(cm)
