@@ -48,6 +48,18 @@ process fetch_all_cms {
   """
 }
 
+process extract_cm_info {
+  input:
+  path("*.cm")
+
+  output:
+  path("names.csv")
+
+  """
+  cat *.cm | cmstat - | sed s'|# idx|idx|' | grep -v '^#' | mlr --ipprint --ocsv cat | mlr cut -of accession,name > names.csv
+  """
+}
+
 process fetch_all_sequences {
   container params.containers.analysis
 
@@ -86,13 +98,13 @@ process fixup_alignments {
   memory 1.GB
 
   input:
-  tuple val(family), path('raw.sto')
+  tuple val(family), path('raw.sto'), val(name)
 
   output:
   path("${family}.sto")
 
   """
-  sed 's|#=GF AU Infernal 1.1.4|#=GF AC   ${family}|' raw.sto > ${family}.sto
+  sed 's|#=GF AU Infernal 1.1.4|#=GF AC   ${family}\\n#=GF ID   ${name}|' raw.sto > ${family}.sto
   """
 }
 
@@ -119,6 +131,12 @@ workflow rfam {
     | map { it -> [it.baseName, it] } \
     | set { cms }
 
+    cms \
+    | collect \
+    | extract_cm_info \
+    | splitCsv \
+    | set { names }
+
     fetch_all_sequences \
     | flatten \
     | map { it -> [it.baseName, it] } \
@@ -127,6 +145,7 @@ workflow rfam {
     sequences
     | join(cms, failOnMismatch: true) \
     | build_full_alignments \
+    | join(names) \
     | fixup_alignments \
     | collect \
     | combine_full_alignments \
