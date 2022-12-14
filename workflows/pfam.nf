@@ -1,5 +1,7 @@
-process fetch_pfam_seed {
+process fetch_seed {
   container params.containers.analysis
+  time '1h'
+  memory 1.GB
 
   output:
   tuple val('Pfam'), val('seed'), path('pfam.seed')
@@ -9,8 +11,10 @@ process fetch_pfam_seed {
   """
 }
 
-process fetch_pfam_full {
+process fetch_full {
   container params.containers.analysis
+  time '1h'
+  memory 1.GB
 
   output:
   tuple val('Pfam'), val('full'), path('pfam.full')
@@ -22,8 +26,8 @@ process fetch_pfam_full {
 
 workflow pfam {
   main:
-    fetch_pfam_seed | set { seeds }
-    fetch_pfam_full | set { full }
+    fetch_seed | set { seeds }
+    fetch_full | set { full }
   emit:
     seeds = seeds
     full = full

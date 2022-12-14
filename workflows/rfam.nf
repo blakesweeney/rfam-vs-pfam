@@ -64,6 +64,7 @@ process build_full_alignments {
   tag { "$family" }
   memory { 6.GB * params.cmalign.cpus }
   cpus { params.cmalign.cpus }
+  queue 'standard'
   container params.containers.analysis
   maxForks params.cmalign.maxForks
 

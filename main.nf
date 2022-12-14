@@ -1,5 +1,5 @@
 include { rfam } from './workflows/rfam'
-/* include { pfam } from './workflows/pfam' */
+include { pfam } from './workflows/pfam'
 
 process alignment_stats {
   tag { "$source-$kind" }
@@ -17,8 +17,9 @@ process alignment_stats {
   /* kind = source.toLowerCase().startsWith('rfam') ? 'rna' : 'amino' */
   /* esl-alistat --small --${kind} --informat pfam -1 $alignment \ */
   """
-  esl-alistat -1 $alignment \
-  | sed 's/# idx/idx/' \
+  esl-alistat -1 $alignment > alistat
+
+  sed 's/# idx/idx/' alistat \
   | grep -v '^#' \
   | mlr --ipprint --ocsv cat \
   | mlr --csv clean-whitespace > ${alignment.baseName}.stats.csv
