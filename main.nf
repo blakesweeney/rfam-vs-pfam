@@ -98,12 +98,10 @@ process create_family_plots {
 
 workflow {
   rfam()
-  /* (rfam.seeds & pfam.seeds) | mix | set { seed } */
+  pfam()
 
-  rfam.out.seeds | set { seed }
-
-  /* (rfam.full & pfam.full) | mix | set { full } */
-  rfam.out.full | set { full }
+  rfam.out.seeds.mix(pfam.out.seeds) | set { seed }
+  rfam.out.full.mix(pfam.out.full) | set { full }
 
   seed \
   | map { source, kind, align -> [source, align] } \

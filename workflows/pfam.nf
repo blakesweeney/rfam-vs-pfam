@@ -15,20 +15,16 @@ process fetch_pfam_full {
   output:
   tuple val('Pfam'), val('full'), path('pfam.full')
 
-  // """
-  // wget -O - 'http://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam35.0/Pfam-A.full.gz' | gzip -d > pfam.full
-  // """
-
   """
-  wget -O - 'http://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam${params.pfam.version}/Pfam-A.seed.gz' | gzip -d > pfam.full
+  wget -O - 'http://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam${params.pfam.version}/Pfam-A.full.gz' | gzip -d > pfam.full
   """
 }
 
 workflow pfam {
-  emit:
-    seeds = seeds
-    full = full
   main:
     fetch_pfam_seed | set { seeds }
     fetch_pfam_full | set { full }
+  emit:
+    seeds = seeds
+    full = full
 }
