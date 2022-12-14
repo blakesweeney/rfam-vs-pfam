@@ -13,11 +13,12 @@ pkgs.devshell.mkShell {
   packages = with pkgs; [
     easel
     gnused
+    infernal
     jdk
     just
-    infernal
     miller
     rEnv
+    seqkit
     wget
   ];
 }

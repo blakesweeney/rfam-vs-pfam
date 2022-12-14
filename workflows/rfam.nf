@@ -49,6 +49,8 @@ process fetch_all_cms {
 }
 
 process extract_cm_info {
+  container params.containers.analysis
+
   input:
   path("*.cm")
 
@@ -56,7 +58,9 @@ process extract_cm_info {
   path("names.csv")
 
   """
-  cat *.cm | cmstat - | sed s'|# idx|idx|' | grep -v '^#' | mlr --ipprint --ocsv cat | mlr cut -of accession,name > names.csv
+  cat *.cm | cmstat - > stats
+  sed s'|# idx|idx|' stats | grep -v '^#' > stats.pprint
+  mlr --ipprint --ocsv cat stats.pprint | mlr --csv cut -o -f accession,name > names.csv
   """
 }
 
@@ -89,7 +93,9 @@ process build_full_alignments {
   script:
   options = family in ['RF02543', 'RF02541', 'RF02546', 'RF02540'] ? '--mxsize 4096' : ''
   """
-  cmalign $options --cpu ${params.cmalign.cpus} $cm $fasta > ${family}.sto
+  esl-reformat -r fasta $fasta > rna.fa
+  seqkit rmdup rna.fa > dedup.fa
+  cmalign $options --cpu ${params.cmalign.cpus} $cm dedup.fa > ${family}.sto
   """
 }
 
@@ -126,16 +132,17 @@ workflow rfam {
   main:
     fetch_seed | set { seeds }
 
-    fetch_all_cms \
+    fetch_all_cms | set { cm_files }
+
+    cm_files
     | flatten \
     | map { it -> [it.baseName, it] } \
     | set { cms }
 
-    cms \
-    | collect \
+    cm_files \
     | extract_cm_info \
     | splitCsv \
-    | set { names }
+    | set { family_names }
 
     fetch_all_sequences \
     | flatten \
@@ -145,7 +152,7 @@ workflow rfam {
     sequences
     | join(cms, failOnMismatch: true) \
     | build_full_alignments \
-    | join(names) \
+    | join(family_names) \
     | fixup_alignments \
     | collect \
     | combine_full_alignments \
