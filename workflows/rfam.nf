@@ -65,20 +65,39 @@ process build_full_alignments {
   memory { 6.GB * params.cmalign.cpus }
   cpus { params.cmalign.cpus }
   container params.containers.analysis
-  maxForks 20
+  maxForks params.cmalign.maxForks
 
   input:
   tuple val(family), path(fasta), path(cm)
 
   output:
+  tuple val(family), path("${family}.sto")
+
+  script:
+  options = family in ['RF02543', 'RF02541', 'RF02546', 'RF02540'] ? '--mxsize 4096' : ''
+  """
+  cmalign $options --cpu ${params.cmalign.cpus} $cm $fasta > ${family}.sto
+  """
+}
+
+process fixup_alignments {
+  tag { "$family" }
+  memory 1.GB
+
+  input:
+  tuple val(family), path('raw.sto')
+
+  output:
   path("${family}.sto")
 
   """
-  cmalign --cpu ${params.cmalign.cpus} $cm $fasta > ${family}.sto
+  sed 's|#=GF AU Infernal 1.1.4|#=GF AC   ${family}|' raw.sto > ${family}.sto
   """
 }
 
 process combine_full_alignments {
+  memory 1.GB
+
   input:
   path("raw*.sto")
 
@@ -107,6 +126,7 @@ workflow rfam {
     sequences
     | join(cms, failOnMismatch: true) \
     | build_full_alignments \
+    | fixup_alignments \
     | collect \
     | combine_full_alignments \
     | set { full }

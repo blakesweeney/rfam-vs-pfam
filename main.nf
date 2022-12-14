@@ -5,6 +5,7 @@ process alignment_stats {
   tag { "$source-$kind" }
   publishDir 'data/', mode: 'copy'
   container params.containers.analysis
+  memory { source == 'Rfam' && kind == 'full' ? 10.GB : 2.GB }
 
   input:
   tuple val(source), val(kind), path(alignment)
@@ -42,7 +43,7 @@ process extract_family_info {
   | sed -e 's|DR   \\(\\w\\+\\);|\\1   |' \
   | uniq \
   | mlr --xtab clean-whitespace \
-  | mlr --ixtab --ocsv cut -o -f 'AC,ID,DE,TP' > ${source}.families-info.csv
+  | mlr --ixtab --ocsv cut -o -f 'AC,DE,TP' > ${source}.families-info.csv
   """
 }
 
@@ -58,9 +59,9 @@ process combine_stats {
   tuple val(source), val(kind), path("${source}.${kind}.families.csv")
 
   """
-  mlr --csv join -j ID -l ID -r name -f $info $stats \
-  | mlr --csv cut -f 'AC,ID,DE,TP,alen,nseq,nres,small,large,avlen,%id' \
-  | mlr --csv rename 'AC,rfam_acc,ID,id,TP,rna_type,DE,description,alen,number_of_columns,nseq,number_seqs,nres,number_residues,small,small,large,large,avlen,average_length,%id,percent_identity' \
+  mlr --csv join -j AC -l AC -r name -f $info $stats \
+  | mlr --csv cut -f 'AC,DE,TP,alen,nseq,nres,small,large,avlen,%id' \
+  | mlr --csv rename 'AC,rfam_acc,TP,rna_type,DE,description,alen,number_of_columns,nseq,number_seqs,nres,number_residues,small,small,large,large,avlen,average_length,%id,percent_identity' \
   | mlr --csv put '\$source="$source $kind"' > ${source}.${kind}.families.csv
   """
 }
