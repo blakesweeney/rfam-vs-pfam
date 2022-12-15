@@ -9,7 +9,7 @@ process split_alignments {
   tuple val(source), val(kind), path(alignment)
 
   input:
-  tuple val(source), val(kind), path('alignments/*.sto')
+  path('alignments/*.sto')
 
   """
   mkdir alignments
@@ -148,6 +148,11 @@ workflow {
 
   seed.mix(full) \
   | split_alignments \
+  | flatten \
+  | map { filename -> 
+    parts = filename.baseName.split('-')
+    [parts[0], parts[1], filename ]
+  } \
   | alignment_stats \
   | groupBy(by: [0, 1]) \
   | merge_stats \
