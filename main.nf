@@ -1,17 +1,39 @@
 include { rfam } from './workflows/rfam'
 include { pfam } from './workflows/pfam'
 
+process split_alignments {
+  tag { "$source-$kind" }
+  container params.containers.analysis
+
+  input:
+  tuple val(source), val(kind), path(alignment)
+
+  input:
+  tuple val(source), val(kind), path('alignments/*.sto')
+
+  """
+  mkdir alignments
+  esl-afetch --index "$alignment"
+  grep '^#=GF ID' "$alignment" | awk '{ print \$3 }' > ids
+  split \
+    --filter 'esl-afetch -f "$alignment" - >> "$FILE"' \
+    --additional-suffix='.sto' \
+    --lines=4000 \
+    ids "alignments/${source}-${kind}-"
+  """
+}
+
 process alignment_stats {
   tag { "$source-$kind" }
   publishDir 'data/', mode: 'copy'
   container params.containers.analysis
-  memory { source == 'Rfam' && kind == 'full' ? 10.GB : 2.GB }
+  memory { kind == 'full' ? 10.GB : 2.GB }
 
   input:
   tuple val(source), val(kind), path(alignment)
 
   output:
-  tuple val(source), val(kind), path("${alignment.baseName}.stats.csv")
+  tuple val(source), val(kind), path("${source}-${kind}.stats.csv")
 
   script:
   /* kind = source.toLowerCase().startsWith('rfam') ? 'rna' : 'amino' */
@@ -22,7 +44,22 @@ process alignment_stats {
   sed 's/# idx/idx/' alistat \
   | grep -v '^#' \
   | mlr --ipprint --ocsv cat \
-  | mlr --csv clean-whitespace > ${alignment.baseName}.stats.csv
+  | mlr --csv clean-whitespace > ${source}-${kind}.stats.csv
+  """
+}
+
+process merge_stats {
+  tag { "$source-$kind" }
+  container params.containers.analysis
+
+  input:
+  tuple val(source), val(kind), path('raw*.csv')
+
+  input:
+  tuple val(source), val(kind), path("${source}-${kind}.csv")
+
+  """
+  mlr --csv cat raw*.csv >"${source}-${kind}.csv"
   """
 }
 
@@ -110,7 +147,10 @@ workflow {
   | set { family_info }
 
   seed.mix(full) \
+  | split_alignments \
   | alignment_stats \
+  | groupBy(by: [0, 1]) \
+  | merge_stats \
   | set { stats }
 
   stats \

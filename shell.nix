@@ -11,6 +11,7 @@ pkgs.devshell.mkShell {
   motd = "";
 
   packages = with pkgs; [
+    coreutils
     easel
     gnused
     infernal
