@@ -1,7 +1,7 @@
 FROM debian
 
 RUN apt-get update -y
-RUN apt-get install -y miller wget sed gcc make
+RUN apt-get install -y miller wget sed gcc make seqkit
 
 RUN \
     cd / && \
