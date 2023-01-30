@@ -1,29 +1,6 @@
 include { rfam } from './workflows/rfam'
 include { pfam } from './workflows/pfam'
 
-process split_alignments {
-  tag { "$source-$kind" }
-  container params.containers.analysis
-  memory 4.GB
-
-  input:
-  tuple val(source), val(kind), path(alignment)
-
-  output:
-  path('alignments/*.sto')
-
-  """
-  mkdir alignments
-  esl-afetch --index "$alignment"
-  grep '^#=GF ID' "$alignment" | awk '{ print \$3 }' > ids
-  split \
-    --filter 'esl-afetch -f "$alignment" - >> "$FILE"' \
-    --additional-suffix='.sto' \
-    --lines=4000 \
-    ids "alignments/${source}-${kind}-"
-  """
-}
-
 process alignment_stats {
   tag { "$source-$kind" }
   publishDir 'data/', mode: 'copy'
@@ -148,7 +125,6 @@ workflow {
   | set { family_info }
 
   seed.mix(full) \
-  | split_alignments \
   | flatten \
   | map { filename ->
     parts = filename.baseName.split('-')
