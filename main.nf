@@ -4,11 +4,12 @@ include { pfam } from './workflows/pfam'
 process split_alignments {
   tag { "$source-$kind" }
   container params.containers.analysis
+  memory 4.GB
 
   input:
   tuple val(source), val(kind), path(alignment)
 
-  input:
+  output:
   path('alignments/*.sto')
 
   """
@@ -149,7 +150,7 @@ workflow {
   seed.mix(full) \
   | split_alignments \
   | flatten \
-  | map { filename -> 
+  | map { filename ->
     parts = filename.baseName.split('-')
     [parts[0], parts[1], filename ]
   } \
