@@ -77,6 +77,7 @@ process fetch_all_sequences {
 }
 
 process build_full_alignments {
+  publishDir 'data/full-alignments', mode: 'copy'
   tag { "$family" }
   memory { 6.GB * params.cmalign.cpus }
   cpus { params.cmalign.cpus }
