@@ -82,6 +82,21 @@ process combine_stats {
   """
 }
 
+process merge_family_stats {
+  publishDir 'data/', mode: 'copy'
+  container params.containers.analysis
+
+  input:
+  path('raw*.csv')
+
+  output:
+  path('merged.csv')
+
+  """
+  mlr --csv cat raw*.csv > merged.csv
+  """
+}
+
 process create_family_plots {
   publishDir 'plots/', mode: 'copy'
   container params.containers.plot
