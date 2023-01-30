@@ -33,7 +33,7 @@ process merge_stats {
   input:
   tuple val(source), val(kind), path('raw*.csv')
 
-  input:
+  output:
   tuple val(source), val(kind), path("${source}-${kind}.csv")
 
   """
