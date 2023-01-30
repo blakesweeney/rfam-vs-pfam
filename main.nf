@@ -82,21 +82,6 @@ process combine_stats {
   """
 }
 
-process merge_family_stats {
-  publishDir 'data/', mode: 'copy'
-  container params.containers.analysis
-
-  input:
-  path('raw*.csv')
-
-  output:
-  path('merged.csv')
-
-  """
-  mlr --csv cat raw*.csv > merged.csv
-  """
-}
-
 process create_family_plots {
   publishDir 'plots/', mode: 'copy'
   container params.containers.plot
@@ -125,14 +110,7 @@ workflow {
   | set { family_info }
 
   seed.mix(full) \
-  | flatten \
-  | map { filename ->
-    parts = filename.baseName.split('-')
-    [parts[0], parts[1], filename ]
-  } \
   | alignment_stats \
-  | groupTuple(by: [0, 1]) \
-  | merge_stats \
   | set { stats }
 
   stats \
