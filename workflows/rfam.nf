@@ -10,6 +10,7 @@ process fetch_seed {
 }
 
 process fetch_structures {
+  publishDir 'data/', mode: 'copy'
   container params.containers.analysis
 
   output:
