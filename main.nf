@@ -131,7 +131,7 @@ workflow {
     [parts[0], parts[1], filename ]
   } \
   | alignment_stats \
-  | groupBy(by: [0, 1]) \
+  | groupTuple(by: [0, 1]) \
   | merge_stats \
   | set { stats }
 
