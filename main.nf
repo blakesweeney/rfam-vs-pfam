@@ -119,6 +119,5 @@ workflow {
   | combine_stats \
   | map { source, kind, data -> data } \
   | collect \
-  | merge_family_stats \
-  | combine(rfam.out.structures)
+  | merge_family_stats
 }
