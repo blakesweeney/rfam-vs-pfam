@@ -58,12 +58,12 @@ rfam_rna_type_df <- data %>%
     select(rfam_acc, rna_type, number_seqs) %>%
     group_by(rna_type) %>%
     summarise(
-      count=n(),
+      count = n(),
       "Number of sequences"=sum(number_seqs),
     ) %>%
     mutate(rna_type=fct_reorder(rna_type, count, .desc=TRUE)) %>%
     rename("Number of families"=count) %>%
-    pivot_longer(!rna_type, names_to="stat")
+    pivot_longer(!rna_type, names_to = "stat")
 
 ## Displayed by counts
 plot <- rfam_rna_type_df %>%
@@ -71,6 +71,7 @@ plot <- rfam_rna_type_df %>%
     ggplot(aes(x = reorder(rna_type, -value), y = value)) +
     geom_bar(stat = "identity") +
     facet_grid(stat ~ ., scales = "free_y") +
+    theme_classic() +
     theme(axis.text.x = element_text(angle = 45, vjust = 0.9, hjust = 1)) +
     labs(x = "RNA type", y = "Count")
 
@@ -94,6 +95,7 @@ plot <- ggplot(data,
                       vjust = 1.5)) +
         scale_color_manual(values = colors) +
         scale_fill_manual(values = colors) +
+    theme_classic() +
         labs(y = "Number of columns")
 
 ggsave(file.path(output, "alignment_size.png"), plot, device = "png")
@@ -117,6 +119,7 @@ plot <- ggplot(data,
                       vjust = -0.5)) +
         scale_color_manual(values = colors) +
         scale_fill_manual(values = colors) +
+    theme_classic() +
         labs(y = "Number of sequences")
 
 ggsave(file.path(output, "alignment_length.png"), plot, device = "png")
@@ -139,6 +142,7 @@ plot <- ggplot(data,
         scale_color_manual(values = colors) +
         scale_fill_manual(values = colors) +
         scale_y_continuous(limits = c(0, 100)) +
+    theme_classic() +
         labs(y = "Percent identity")
 
 ggsave(file.path(output, "alignment_identity.png"), plot, device="png")
@@ -160,6 +164,7 @@ plot <- ggplot(data,
                       vjust = -0.5)) +
         scale_color_manual(values = colors) +
         scale_fill_manual(values = colors) +
+    theme_classic() +
         labs(y = "Percent of gaps")
 
 ggsave(file.path(output, "alignment_gaps.png"), alignment_gaps, device = "png")
@@ -215,6 +220,7 @@ plot <- ggplot(rfam_structures_df,
                aes(x = reorder(rna_type, -value), y = value)) +
         geom_bar(stat = "identity") +
         facet_grid(stat ~ ., scales = "free_y") +
+    theme_classic() +
         theme(axis.text.x = element_text(angle = 45, vjust = 0.9, hjust = 1)) +
         labs(x = "Rfam RNA Type", y = "Count")
 
