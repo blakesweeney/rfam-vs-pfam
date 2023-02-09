@@ -67,7 +67,6 @@ rfam_rna_type_df <- data %>%
 
 ## Displayed by counts
 plot <- rfam_rna_type_df %>%
-    filter(stat == "Number of families") %>%
     ggplot(aes(x = reorder(rna_type, -value), y = value)) +
     geom_bar(stat = "identity") +
     facet_grid(stat ~ ., scales = "free_y") +
