@@ -51,7 +51,7 @@ rna_type_df <- data %>%
           count = n(),
           number_of_sequences = sum(number_seqs),
         )
-rna_type_df$fraction = rna_type_df$count / sum(rna_type_df$count)
+rna_type_df$fraction <- rna_type_df$count / sum(rna_type_df$count)
 
 rfam_rna_type_df <- data %>%
     filter(startsWith(source, "Rfam")) %>%
@@ -197,7 +197,11 @@ rfam_structures_df <- data %>%
     mutate(rna_type = factor(rna_type)) %>%
     mutate(number_of_structures = replace_na(number_of_structures, 0)) %>%
         filter(startsWith(source, "Rfam")) %>%
-        select(rfam_acc, rna_type, number_seqs, number_of_structures, source) %>%
+        select(rfam_acc,
+               rna_type,
+               number_seqs,
+               number_of_structures,
+               source) %>%
         group_by(rna_type) %>%
         summarise(
           Families = n(),
