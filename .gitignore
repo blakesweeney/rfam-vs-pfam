@@ -2,3 +2,5 @@
 nextflow
 work/
 .Rapp.history
+data/full-alignments/
+.DS_Store

@@ -7,7 +7,16 @@ docker:
   docker push bsweeneyebi/rfam-pfam-analysis
   popd
 
-  pushd containers/ggplot
-  docker build -t bsweeneyebi/rfam-pfam-plot .
-  docker push bsweeneyebi/rfam-pfam-plot
-  popd
+plot: plot_rfam_pfam plot_metrics plot_counts
+
+plot_rfam_pfam:
+  mkdir -p plots/rfam-vs-pfam 2>/dev/null || true
+  bin/plot-rfam-pfam.R data/rfam-vs-pfam-counts.csv data/rfam.structures.csv plots/rfam-vs-pfam
+
+plot_metrics:
+  mkdir plots/metrics 2>/dev/null || true
+  bin/plot-metrics.R data/puzzles-metrics.csv plots/metrics
+
+plot_counts:
+  mkdir plots/counts 2>/dev/null || true
+  bin/plot-counts.R data/protein-vs-rna-counts.csv plots/counts

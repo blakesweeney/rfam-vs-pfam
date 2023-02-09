@@ -25,9 +25,33 @@
             inputs.personal.overlay
           ];
         };
+        rEnv = pkgs.rWrapper.override {
+          packages = with pkgs.rPackages; [
+            tidyverse
+            languageserver
+          ];
+        };
       in
       rec {
-        devShell = import ./shell.nix { inherit pkgs; };
+        devShell = pkgs.devshell.mkShell {
+          name = "family-stats-shell";
+          motd = "";
+
+          packages = with pkgs; [
+            coreutils
+            easel
+            gnused
+            infernal
+            jdk
+            just
+            miller
+            rEnv
+            seqkit
+            wget
+            nodePackages.pyright
+            python39
+          ];
+        };
       }
     );
 }

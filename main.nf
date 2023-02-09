@@ -94,21 +94,7 @@ process merge_family_stats {
 
   """
   mlr --csv cat raw*.csv > merged.csv
-  """
-}
-
-process create_family_plots {
-  publishDir 'plots/', mode: 'copy'
-  container params.containers.plot
-
-  input:
-  tuple path(merged), path(rfam_structures)
-
-  output:
-  path("*.png")
-
-  """
-  plot.R $merged $rfam_structures
+  correct_rna_types.py merged.csv > rfam-vs-pfam-counts.csv
   """
 }
 
@@ -135,5 +121,4 @@ workflow {
   | collect \
   | merge_family_stats \
   | combine(rfam.out.structures)
-  | create_family_plots
 }
