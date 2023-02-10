@@ -1,7 +1,7 @@
 FROM debian
 
 RUN apt-get update -y
-RUN apt-get install -y coreutils miller wget sed gcc make seqkit
+RUN apt-get install -y coreutils miller wget sed gcc make seqkit python3
 
 RUN \
     cd / && \
