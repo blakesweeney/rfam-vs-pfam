@@ -12,9 +12,18 @@ dark_pfam <- "#1D427E"
 
 colors <- c(light_pfam, medium_pfam, light_rfam, medium_rfam)
 
+
+plot_rfam_count <- function(data) {
+    ggplot(data, aes(x = rna_type, y = value)) +
+        geom_bar(stat = "identity") +
+        theme_classic() +
+        theme(axis.text.x = element_text(angle = 45, vjust = 0.9, hjust = 1)) +
+        labs(x = "Rfam RNA Type")
+}
+
 args <- commandArgs(trailingOnly = TRUE)
 data <- read_csv(args[1])
-structures <- read_csv(args[2])
+rfam_structures <- read_csv(args[2])
 output <- args[3]
 
 data$alignment_size <- data$number_of_columns * data$number_seqs
@@ -32,6 +41,11 @@ medians <- data %>%
         median_seqs = median(number_seqs),
         median_identity = median(percent_identity),
         median_gaps = median(fraction_gap))
+
+structures <- rfam_structures %>%
+    filter(is_significant == 1) %>%
+    group_by(rfam_acc) %>%
+    summarise(number_of_structures = n())
 
 # Some general stats
 # ggplot(pivoted, aes(x=source, y=value, colour=source, fill=source)) +
@@ -166,7 +180,7 @@ plot <- ggplot(data,
     theme_classic() +
         labs(y = "Percent of gaps")
 
-ggsave(file.path(output, "alignment_gaps.png"), alignment_gaps, device = "png")
+ggsave(file.path(output, "alignment_gaps.png"), plot, device = "png")
 
 # Displayed by percent
 # ggplot(rna_type_df, aes(x=reorder(rna_type, -count), y=fraction)) +
@@ -198,29 +212,56 @@ ggsave(file.path(output, "alignment_gaps.png"), alignment_gaps, device = "png")
 
 rfam_structures_df <- data %>%
     left_join(structures, by = "rfam_acc") %>%
-    mutate(rna_type = factor(rna_type)) %>%
-    mutate(number_of_structures = replace_na(number_of_structures, 0)) %>%
-        filter(startsWith(source, "Rfam")) %>%
-        select(rfam_acc,
-               rna_type,
-               number_seqs,
-               number_of_structures,
-               source) %>%
-        group_by(rna_type) %>%
-        summarise(
-          Families = n(),
-          "Seed Sequences" = sum(number_seqs[source == "Rfam seed"]),
-          "Full Sequences" = sum(number_seqs[source == "Rfam full"]),
-          "Structures" = sum(number_of_structures)) %>%
+    mutate(rna_type = factor(rna_type),
+           number_of_structures = replace_na(number_of_structures, 0)) %>%
+    filter(startsWith(source, "Rfam")) %>%
+    select(rfam_acc,
+           rna_type,
+           number_seqs,
+           number_of_structures,
+           source) %>%
+    group_by(rna_type) %>%
+    summarise(
+      Families = n(),
+      "Seed Sequences" = sum(number_seqs[source == "Rfam seed"]),
+      "Full Sequences" = sum(number_seqs[source == "Rfam full"]),
+      "Structures" = sum(number_of_structures)) %>%
     mutate(rna_type = fct_reorder(rna_type, Families, min, .desc = TRUE)) %>%
-    pivot_longer(!rna_type, names_to = "stat")
+    pivot_longer(!rna_type, names_to = "stat") %>%
+    mutate(stat = factor(stat,
+           levels = c("Families", "Seed Sequences", "Full Sequences", "Structures")))
 
 plot <- ggplot(rfam_structures_df,
-               aes(x = reorder(rna_type, -value), y = value)) +
-        geom_bar(stat = "identity") +
-        facet_grid(stat ~ ., scales = "free_y") +
+               aes(x = rna_type, y = value)) +
+    geom_bar(stat = "identity") +
+    facet_grid(stat ~ ., scales = "free_y") +
     theme_classic() +
-        theme(axis.text.x = element_text(angle = 45, vjust = 0.9, hjust = 1)) +
-        labs(x = "Rfam RNA Type", y = "Count")
+    theme(axis.text.x = element_text(angle = 45, vjust = 0.9, hjust = 1)) +
+    labs(x = "Rfam RNA Type", y = "Count")
 
-ggsave(file.path(output, "rfam_structures.png"), plot, device = "png")
+ggsave(file.path(output, "rfam-seed-full-structures.png"), plot, device = "png")
+
+plot <- rfam_structures_df %>%
+    filter(stat == "Families") %>%
+    plot_rfam_count() +
+    ylab("Number of Families")
+ggsave(file.path(output, "rfam-families.png"), plot, device = "png")
+
+plot <- rfam_structures_df %>%
+    filter(stat == "Seed Sequences") %>%
+    plot_rfam_count() +
+    ylab("Number of Seed Sequences")
+ggsave(file.path(output, "rfam-seed.png"), plot, device = "png")
+
+plot <- rfam_structures_df %>%
+    filter(stat == "Full Sequences") %>%
+    plot_rfam_count() +
+    ylab("Number of Full Sequences")
+
+ggsave(file.path(output, "rfam-full.png"), plot, device = "png")
+
+plot <- rfam_structures_df %>%
+    filter(stat == "Structures") %>%
+    plot_rfam_count() +
+    ylab("Number of Structures")
+ggsave(file.path(output, "rfam-structures.png"), plot, device = "png")
