@@ -114,8 +114,9 @@ workflow {
   | alignment_stats \
   | set { stats }
 
-  stats \
-  | join(family_info) \
+  family_info \
+  | cross(stats) \
+  | map { info, stats -> [stats[0], stats[1], stats[2], info[1]] } \
   | combine_stats \
   | map { source, kind, data -> data } \
   | collect \
