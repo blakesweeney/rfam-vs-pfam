@@ -24,11 +24,24 @@ process fetch_full {
   """
 }
 
+process fetch_structures {
+  publishDir 'data/', mode: 'copy'
+  container params.containers.analysis
+  time '6h'
+  memory 1.GB
+
+  """
+  fetch-pfam-structures.py > pfam.structures.csv
+  """
+}
+
 workflow pfam {
   main:
     fetch_seed | set { seeds }
     fetch_full | set { full }
+    fetch_structures | set { structures }
   emit:
     seeds = seeds
     full = full
+    structures = structures
 }

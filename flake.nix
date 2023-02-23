@@ -45,11 +45,12 @@
             jdk
             just
             miller
+            nextflow
+            nodePackages.pyright
+            python39
             rEnv
             seqkit
             wget
-            nodePackages.pyright
-            python39
           ];
         };
       }
