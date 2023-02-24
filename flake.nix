@@ -29,6 +29,7 @@
           packages = with pkgs.rPackages; [
             tidyverse
             languageserver
+            viridis
           ];
         };
       in

@@ -2,16 +2,12 @@
 
 library(tidyverse)
 
-light_rfam <- "#F7EFEC"
-medium_rfam <- "#A8887B"
-dark_rfam <- "#541D08"
+light_rfam <- rgb(80, 29, 9, alpha = 255 * 0.5, maxColorValue = 255)
+rna_color <- rgb(80, 29, 9, maxColorValue = 255)
+protein_color <- rgb(26, 64, 122, maxColorValue = 255)
+light_pfam <- rgb(26, 64, 122, alpha = 255 * 0.5, maxColorValue = 255)
 
-light_pfam <- "#EEF5FC"
-medium_pfam <- "#C7D4E6"
-dark_pfam <- "#1D427E"
-
-colors <- c(light_pfam, medium_pfam, light_rfam, medium_rfam)
-
+colors <- c(light_pfam, protein_color, light_rfam, rna_color)
 
 plot_rfam_count <- function(data) {
     ggplot(data, aes(x = rna_type, y = value)) +
@@ -73,10 +69,10 @@ rfam_rna_type_df <- data %>%
     group_by(rna_type) %>%
     summarise(
       count = n(),
-      "Number of sequences"=sum(number_seqs),
+      "Number of sequences" = sum(number_seqs),
     ) %>%
-    mutate(rna_type=fct_reorder(rna_type, count, .desc=TRUE)) %>%
-    rename("Number of families"=count) %>%
+    mutate(rna_type = fct_reorder(rna_type, count, .desc = TRUE)) %>%
+    rename("Number of families" = count) %>%
     pivot_longer(!rna_type, names_to = "stat")
 
 ## Displayed by counts
@@ -96,20 +92,21 @@ plot <- ggplot(data,
                    y = number_of_columns,
                    color = source,
                    fill = source)) +
-        geom_violin() +
-        scale_y_log10() +
-        geom_boxplot(width = 0.2, color = "black") +
-        geom_text(data = medians,
-                  show.legend = FALSE,
-                  inherit.aes = FALSE,
-                  aes(x = source,
-                      y = median_cols,
-                      label = median_cols,
-                      vjust = 1.5)) +
-        scale_color_manual(values = colors) +
-        scale_fill_manual(values = colors) +
+    geom_violin() +
+    scale_y_log10() +
+    geom_boxplot(width = 0.2, color = "black") +
+    geom_text(data = medians,
+              show.legend = FALSE,
+              inherit.aes = FALSE,
+              col = "white",
+              aes(x = source,
+                  y = median_cols,
+                  label = median_cols,
+                  vjust = 1.5)) +
+    scale_color_manual(values = colors) +
+    scale_fill_manual(values = colors) +
     theme_classic() +
-        labs(y = "Number of columns")
+    labs(y = "Number of columns", x = "", tag = "B")
 
 ggsave(file.path(output, "alignment_size.png"), plot, device = "png")
 
@@ -119,21 +116,22 @@ plot <- ggplot(data,
                    y = number_seqs,
                    color = source,
                    fill = source)) +
-        geom_violin() +
-        scale_y_log10() +
-        geom_boxplot(width = 0.2, color = "black") +
-        geom_text(data = medians,
-                  show.legend = FALSE,
-                  inherit.aes = FALSE,
-                  aes(x = source,
-                      y = median_seqs,
-                      label = median_seqs,
-                      hjust = 0.5,
-                      vjust = -0.5)) +
-        scale_color_manual(values = colors) +
-        scale_fill_manual(values = colors) +
+    geom_violin() +
+    scale_y_log10() +
+    geom_boxplot(width = 0.2, color = "black") +
+    geom_text(data = medians,
+              show.legend = FALSE,
+              inherit.aes = FALSE,
+              col = "white",
+              aes(x = source,
+                  y = median_seqs,
+                  label = median_seqs,
+                  hjust = 0.5,
+                  vjust = -0.5)) +
+    scale_color_manual(values = colors) +
+    scale_fill_manual(values = colors) +
     theme_classic() +
-        labs(y = "Number of sequences")
+    labs(y = "Number of sequences", x = "", tag = "A")
 
 ggsave(file.path(output, "alignment_length.png"), plot, device = "png")
 
@@ -143,22 +141,23 @@ plot <- ggplot(data,
                    y = percent_identity,
                    color = source,
                    fill = source)) +
-        geom_violin() +
-        geom_boxplot(width = 0.2, color = "black") +
-        geom_text(data = medians,
-                  show.legend = FALSE,
-                  inherit.aes = FALSE,
-                  aes(x = source,
-                      y = median_identity,
-                      label = median_identity,
-                      vjust = -0.5)) +
-        scale_color_manual(values = colors) +
-        scale_fill_manual(values = colors) +
-        scale_y_continuous(limits = c(0, 100)) +
+    geom_violin() +
+    geom_boxplot(width = 0.2, color = "black") +
+    geom_text(data = medians,
+              show.legend = FALSE,
+              inherit.aes = FALSE,
+              col = "white",
+              aes(x = source,
+                  y = median_identity,
+                  label = median_identity,
+                  vjust = -0.5)) +
+    scale_color_manual(values = colors) +
+    scale_fill_manual(values = colors) +
+    scale_y_continuous(limits = c(0, 100)) +
     theme_classic() +
-        labs(y = "Percent identity")
+    labs(y = "Percent identity", x = "", tag = "C")
 
-ggsave(file.path(output, "alignment_identity.png"), plot, device="png")
+ggsave(file.path(output, "alignment_identity.png"), plot, device = "png")
 
 # Fraction of gaps
 plot <- ggplot(data,
@@ -166,19 +165,20 @@ plot <- ggplot(data,
                    y = fraction_gap,
                    color = source,
                    fill = source)) +
-        geom_violin() +
-        geom_boxplot(width = 0.2, color = "black") +
-        geom_text(data = medians,
-                  show.legend = FALSE,
-                  inherit.aes = FALSE,
-                  aes(x = source,
-                      y = median_gaps,
-                      label = median_gaps,
-                      vjust = -0.5)) +
-        scale_color_manual(values = colors) +
-        scale_fill_manual(values = colors) +
+    geom_violin() +
+    geom_boxplot(width = 0.2, color = "black") +
+    geom_text(data = medians,
+              show.legend = FALSE,
+              inherit.aes = FALSE,
+              col = "white",
+              aes(x = source,
+                  y = median_gaps,
+                  label = median_gaps,
+                  vjust = -0.5)) +
+    scale_color_manual(values = colors) +
+    scale_fill_manual(values = colors) +
     theme_classic() +
-        labs(y = "Percent of gaps")
+    labs(y = "Percent of gaps", x = "")
 
 ggsave(file.path(output, "alignment_gaps.png"), plot, device = "png")
 
@@ -210,7 +210,7 @@ ggsave(file.path(output, "alignment_gaps.png"), plot, device = "png")
 #
 #  grid.arrange(number_residues_p, number_seqs_p, ncol=1)
 
-rfam_structures_df <- data %>%
+rfam_summary_df <- data %>%
     left_join(structures, by = "rfam_acc") %>%
     mutate(rna_type = factor(rna_type),
            number_of_structures = replace_na(number_of_structures, 0)) %>%
@@ -222,14 +222,26 @@ rfam_structures_df <- data %>%
            source) %>%
     group_by(rna_type) %>%
     summarise(
-      Families = n(),
+      Families = n_distinct(rfam_acc),
       "Seed Sequences" = sum(number_seqs[source == "Rfam seed"]),
       "Full Sequences" = sum(number_seqs[source == "Rfam full"]),
       "Structures" = sum(number_of_structures)) %>%
-    mutate(rna_type = fct_reorder(rna_type, Families, min, .desc = TRUE)) %>%
+    mutate(rna_type = fct_reorder(rna_type, Families, min, .desc = TRUE))
+
+rfam_structures_df <- rfam_summary_df %>%
     pivot_longer(!rna_type, names_to = "stat") %>%
     mutate(stat = factor(stat,
            levels = c("Families", "Seed Sequences", "Full Sequences", "Structures")))
+
+rfam_with_frac <- rfam_summary_df %>%
+    mutate(
+        family_fraction = Families / sum(Families),
+        structure_fraction = Structures / sum(Structures),
+        full_fraction = `Full Sequences` / sum(`Full Sequences`),
+        seed_fraction = `Seed Sequences` / sum(`Seed Sequences`)
+    )
+
+print(rfam_with_frac %>% filter(rna_type %in% c("miRNA Precursor", "snoRNA", "sRNA", "tRNA", "rRNA subunit")))
 
 plot <- ggplot(rfam_structures_df,
                aes(x = rna_type, y = value)) +
