@@ -30,6 +30,8 @@
             tidyverse
             languageserver
             viridis
+            ggbeeswarm
+            ggridges
           ];
         };
       in

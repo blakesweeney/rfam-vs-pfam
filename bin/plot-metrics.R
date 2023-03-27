@@ -16,7 +16,7 @@ plot_metric_range <- function(data, ymax, ymin=0) {
     geom_ribbon(aes(x = Index, ymin = Min, ymax = Max), fill = "grey70") +
     geom_line(aes(x = Index, y = Min)) +
     geom_line(aes(x = Index, y = Max)) +
-    scale_x_continuous(labels  =  data$Puzzle, breaks  =  data$Index) +
+    scale_x_continuous(labels = data$Puzzle, breaks  =  data$Index) +
     theme_classic() +
     theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
     annotate(geom = "text", x = labels$x, y = labels$y, label = labels$text) +

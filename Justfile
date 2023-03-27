@@ -7,7 +7,7 @@ docker:
   docker push bsweeneyebi/rfam-pfam-analysis
   popd
 
-plot: plot_rfam_pfam plot_metrics plot_counts plot_pdb_summary plot_pdb_counts
+plot: plot_rfam_pfam plot_metrics plot_counts plot_pdb_summary plot_pdb_counts plot_puzzle_quality
 
 plot_rfam_pfam:
   mkdir -p plots/rfam-vs-pfam 2>/dev/null || true
@@ -28,3 +28,8 @@ plot_pdb_summary:
 plot_pdb_counts:
   mkdir plots/pdb_counts 2>/dev/null || true
   bin/plot-pdb-nt-resolution.R data/pdb-by-resolution.csv plots/pdb_counts
+
+plot_puzzle_quality:
+  rm -r plots/puzzle-quality || true
+  mkdir plots/puzzle-quality 2>/dev/null
+  bin/plot_rna_puzzle_quality.R data/puzzle-quality.csv plots/puzzle-quality
