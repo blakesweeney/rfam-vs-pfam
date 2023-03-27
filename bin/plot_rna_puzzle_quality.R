@@ -69,22 +69,32 @@ plot_beeswarm <- function(data, ymax, ymin=0) {
 }
 
 plot_ridges <- function(data, ymax, ymin=0) {
-  yrange <- abs(ymax - ymin)
-  labels <- data %>%
-    group_by(Year) %>%
-    summarise(x = mean(Index),
-              y = ymax * (-9.5 / 80),
-              yshift = ymax * (2 / 80),
-              text = min(Year),
-              xmin = min(Index),
-              xmax = max(Index))
-
     plot <- ggplot(data, aes(y = Puzzle, x = value)) +
         geom_density_ridges(aes(group = Puzzle)) +
         theme_classic() +
-        theme(axis.text.x = element_text(angle = 45, vjust = 0.5),
-              plot.margin = margin(l = 25, r = 10, t = 10, b = 25)) +
-        ylab("")
+        xlim(ymin, ymax)
+
+    return(plot)
+}
+
+plot_ridges_colored <- function(data, ymax, ymin=0) {
+    d <- data %>% mutate(Year = factor(Year))
+    plot <- ggplot(d, aes(y = Puzzle, x = value, group = Puzzle, fill = Year)) +
+        geom_density_ridges() +
+        theme_classic() +
+        scale_fill_discrete() +
+        xlim(ymin, ymax)
+
+    return(plot)
+}
+
+plot_ridge_boxes_colored <- function(data, ymax, ymin=0) {
+    d <- data %>% mutate(Year = factor(Year))
+    plot <- ggplot(d, aes(y = Puzzle, x = value, group = Puzzle, fill = Year)) +
+        geom_density_ridges(stat = "binline", bins = 50) +
+        theme_classic() +
+        scale_fill_discrete() +
+        xlim(ymin, ymax)
 
     return(plot)
 }
@@ -106,6 +116,10 @@ medians <- data %>%
               median_inf_stacking = median(`INF-stacking`),
               median_rmsd = median(RMSD))
 
+################################################################3
+# Merged plots
+################################################################3
+
 plot <- pivoted %>%
     filter(Metric %in% c("RMSD", "INF-NWC", "INF-WC")) %>%
     ggplot(aes(x = Index, y = value)) +
@@ -115,6 +129,32 @@ plot <- pivoted %>%
         ylab("Value") +
         theme_classic()
 ggsave(file.path(output, "all-metrics-box-trend.png"), plot, device = "png")
+
+plot <- pivoted %>%
+    filter(Metric %in% c("INF-NWC", "INF-WC", "RMSD")) %>%
+    mutate(Year = factor(Year)) %>%
+    ggplot(aes(x = value, y = Puzzle, group = Puzzle, fill = Year)) +
+    geom_density_ridges() +
+    facet_grid(. ~ Metric, scales = "free") +
+    theme_classic() +
+    scale_fill_discrete() +
+    xlab("")
+ggsave(file.path(output, "all-metrics-ridges-colors.png"), plot, device = "png")
+
+plot <- pivoted %>%
+    filter(Metric %in% c("INF-NWC", "INF-WC", "RMSD")) %>%
+    mutate(Year = factor(Year)) %>%
+    ggplot(aes(x = value, y = Puzzle, group = Puzzle, fill = Year)) +
+    geom_density_ridges(stat = "binline", bins = 50) +
+    facet_grid(. ~ Metric, scales = "free") +
+    theme_classic() +
+    scale_fill_discrete() +
+    xlab("")
+ggsave(file.path(output, "all-metrics-box-ridges-colors.png"), plot, device = "png")
+
+################################################################3
+# RMSD
+################################################################3
 
 plot <- pivoted %>%
     filter(Metric %in% c("RMSD")) %>%
@@ -135,6 +175,22 @@ plot <- pivoted %>%
 ggsave(file.path(output, "rmsd-points-ridges.png"), plot, device = "png")
 
 plot <- pivoted %>%
+    filter(Metric %in% c("RMSD")) %>%
+    plot_ridges_colored(ymax = 80) +
+    xlab("RMSD (Å)")
+ggsave(file.path(output, "rmsd-points-ridges-colors.png"), plot, device = "png")
+
+plot <- pivoted %>%
+    filter(Metric %in% c("RMSD")) %>%
+    plot_ridge_boxes_colored(ymax = 80) +
+    xlab("RMSD (Å)")
+ggsave(file.path(output, "rmsd-points-ridge-boxes-colors.png"), plot, device = "png")
+
+################################################################3
+# INF-NWC
+################################################################3
+
+plot <- pivoted %>%
     filter(Metric == "INF-NWC") %>%
     plot_metric_box(ymax = 1) +
     ylab("non-Watson Crick Basepair Similarity")
@@ -153,6 +209,22 @@ plot <- pivoted %>%
 ggsave(file.path(output, "inf-nwc-ridges.png"), plot, device = "png")
 
 plot <- pivoted %>%
+    filter(Metric == "INF-NWC") %>%
+    plot_ridges_colored(ymax = 1) +
+    xlab("non-Watson Crick Basepair Similarity")
+ggsave(file.path(output, "inf-nwc-ridges-colors.png"), plot, device = "png")
+
+plot <- pivoted %>%
+    filter(Metric == "INF-NWC") %>%
+    plot_ridge_boxes_colored(ymax = 1) +
+    xlab("non-Watson Crick Basepair Similarity")
+ggsave(file.path(output, "inf-nwc-ridge-boxes-colors.png"), plot, device = "png")
+
+################################################################3
+# INF-WC
+################################################################3
+
+plot <- pivoted %>%
     filter(Metric %in% c("INF-WC")) %>%
     plot_metric_box(ymax = 1) +
     ylab("Watson Crick Basepair Similarity")
@@ -169,3 +241,15 @@ plot <- pivoted %>%
     plot_ridges(ymax = 1) +
     xlab("Watson Crick Basepair Similarity")
 ggsave(file.path(output, "inf-wc-ridges.png"), plot, device = "png")
+
+plot <- pivoted %>%
+    filter(Metric %in% c("INF-WC")) %>%
+    plot_ridges_colored(ymax = 1) +
+    xlab("Watson Crick Basepair Similarity")
+ggsave(file.path(output, "inf-wc-ridges-colors.png"), plot, device = "png")
+
+plot <- pivoted %>%
+    filter(Metric %in% c("INF-WC")) %>%
+    plot_ridge_boxes_colored(ymax = 1) +
+    xlab("Watson Crick Basepair Similarity")
+ggsave(file.path(output, "inf-wc-ridge-boxes-colors.png"), plot, device = "png")
