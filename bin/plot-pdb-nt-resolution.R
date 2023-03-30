@@ -41,7 +41,7 @@ plot <- ggplot(no_dna,
     scale_color_viridis(discrete = TRUE, direction = -1) +
     scale_fill_viridis(discrete = TRUE, direction = -1) +
     facet_grid(~ Year, switch = "both") +
-    ylab("Fraction of total structures")
+    ylab("Fraction of total residues")
 ggsave(file.path(output, "resolution-fraction-no-dna.png"),
        plot,
        device = "png")
@@ -56,5 +56,5 @@ plot <- ggplot(data,
     scale_color_viridis(discrete = TRUE, direction = -1) +
     scale_fill_viridis(discrete = TRUE, direction = -1) +
     facet_grid(~ Year, switch = "both") +
-    ylab("Fraction of total structures")
+    ylab("Fraction of total residues")
 ggsave(file.path(output, "resolution-fraction.png"), plot, device = "png")

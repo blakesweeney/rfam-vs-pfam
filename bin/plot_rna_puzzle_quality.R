@@ -120,6 +120,8 @@ medians <- data %>%
 # Merged plots
 ################################################################3
 
+# TODO: Rename RMSD to `RMSD (Å)` for this section only
+
 plot <- pivoted %>%
     filter(Metric %in% c("RMSD", "INF-NWC", "INF-WC")) %>%
     ggplot(aes(x = Index, y = value)) +
@@ -253,3 +255,5 @@ plot <- pivoted %>%
     plot_ridge_boxes_colored(ymax = 1) +
     xlab("Watson Crick Basepair Similarity")
 ggsave(file.path(output, "inf-wc-ridge-boxes-colors.png"), plot, device = "png")
+
+# color brewer: type="qual", palette=3 or 8

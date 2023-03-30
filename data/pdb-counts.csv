@@ -1,0 +1,10 @@
+Molecule,Resolution,Number of structures
+Protein,≤2.0Å,70410
+RNA,≤2.0Å,357
+Protein/RNA,≤2.0Å,360
+Protein,>2.0Å ≤3.0Å,85638
+RNA,>2.0Å ≤3.0Å,599
+Protein/RNA,>2.0Å ≤3.0Å,1684
+Protein,>3.0Å,15050
+RNA,>3.0Å,215
+Protein/RNA,>3.0Å,2525
