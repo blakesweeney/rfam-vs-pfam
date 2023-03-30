@@ -22,6 +22,7 @@ plot <- ggplot(data,
                   position = position_dodge(1),
                   vjust = 0) +
     scale_fill_viridis(discrete = TRUE, direction = -1) +
+    theme_classic() +
     ylab("Number of Structures")
 ggsave(file.path(output, "structures-by-resolution-kind.png"),
        plot,
