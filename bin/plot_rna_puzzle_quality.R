@@ -120,10 +120,37 @@ medians <- data %>%
 # Merged plots
 ################################################################3
 
-# TODO: Rename RMSD to `RMSD (Å)` for this section only
+labels <- data %>%
+  group_by(Year) %>%
+  summarise(x = mean(Index),
+            y = 80 * (-9.5 / 80),
+            yshift = 80 * (2 / 80),
+            text = min(Year),
+            xmin = min(Index),
+            xmax = max(Index))
 
 plot <- pivoted %>%
     filter(Metric %in% c("RMSD", "INF-NWC", "INF-WC")) %>%
+    mutate(Metric = ifelse(Metric == "RMSD", "RMSD (Å)", Metric)) %>%
+    ggplot(aes(x = Puzzle, y = value)) +
+        geom_boxplot(aes(group = Puzzle)) +
+        facet_grid(Metric ~ ., scales = "free") +
+        ylab("") +
+        theme_classic() +
+        theme(axis.text.x = element_text(angle = 45, vjust = 0.5),
+              plot.margin = margin(l = 25, r = 10, t = 10, b = 25))
+        # geom_segment(data = labels,
+        #              mapping = aes(x = xmin - 0.2,
+        #                          xend = xmax + 0.2,
+        #                          y = y + yshift,
+        #                          yend = y + yshift))
+        # coord_cartesian(clip = "off", expand = FALSE) +
+        # geom_text(data = labels, aes(x = x, y = y, label = text, hjust = 0.5))
+ggsave(file.path(output, "all-metrics-box.png"), plot, device = "png")
+
+plot <- pivoted %>%
+    filter(Metric %in% c("RMSD", "INF-NWC", "INF-WC")) %>%
+    mutate(Metric = ifelse(Metric == "RMSD", "RMSD (Å)", Metric)) %>%
     ggplot(aes(x = Index, y = value)) +
         geom_smooth(method = "lm", col = "blue", se = FALSE) +
         geom_boxplot(aes(group = Puzzle)) +
@@ -134,6 +161,7 @@ ggsave(file.path(output, "all-metrics-box-trend.png"), plot, device = "png")
 
 plot <- pivoted %>%
     filter(Metric %in% c("INF-NWC", "INF-WC", "RMSD")) %>%
+    mutate(Metric = ifelse(Metric == "RMSD", "RMSD (Å)", Metric)) %>%
     mutate(Year = factor(Year)) %>%
     ggplot(aes(x = value, y = Puzzle, group = Puzzle, fill = Year)) +
     geom_density_ridges() +
@@ -145,6 +173,7 @@ ggsave(file.path(output, "all-metrics-ridges-colors.png"), plot, device = "png")
 
 plot <- pivoted %>%
     filter(Metric %in% c("INF-NWC", "INF-WC", "RMSD")) %>%
+    mutate(Metric = ifelse(Metric == "RMSD", "RMSD (Å)", Metric)) %>%
     mutate(Year = factor(Year)) %>%
     ggplot(aes(x = value, y = Puzzle, group = Puzzle, fill = Year)) +
     geom_density_ridges(stat = "binline", bins = 50) +

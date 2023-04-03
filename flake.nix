@@ -32,6 +32,7 @@
             viridis
             ggbeeswarm
             ggridges
+            ggpubr
           ];
         };
       in
