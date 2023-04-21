@@ -73,7 +73,6 @@ plot <- ggplot(no_dna,
     geom_bar(stat = "identity") +
     geom_text(size = 3, position = position_stack(vjust = 0.5), col = "white") +
     theme_classic() +
-    lab("A") +
     scale_fill_manual(guide = guide_legend(title = "Molecule"),
                       values = c(protein_color, rna_color)) +
     scale_color_manual(values = c(protein_color, rna_color))
@@ -91,7 +90,6 @@ plot <- ggplot(no_dna,
     geom_bar(stat = "identity") +
     geom_text(size = 3, position = position_stack(vjust = 0.5), col = "white") +
     theme_classic() +
-    lab("A") +
     scale_y_log10() +
     scale_fill_manual(guide = guide_legend(title = "Molecule"),
                       values = c(protein_color, rna_color)) +

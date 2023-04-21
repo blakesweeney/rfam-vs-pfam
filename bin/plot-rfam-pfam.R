@@ -43,15 +43,6 @@ structures <- rfam_structures %>%
     group_by(rfam_acc) %>%
     summarise(number_of_structures = n())
 
-# Some general stats
-# ggplot(pivoted, aes(x=source, y=value, colour=source, fill=source)) +
-#       facet_grid(rows=vars(stat), scales="free_y") +
-#       geom_violin() +
-#       scale_y_log10() +
-#       scale_color_manual(values = c("#BECBDC", "#A18276")) +
-#       scale_fill_manual(values = c("#BECBDC", "#A18276"))
-
-
 # Rfam families cover a very few types of RNAs
 rna_type_df <- data %>%
         filter(startsWith(source, "Rfam")) %>%
