@@ -42,4 +42,4 @@ plot <- ggplot(pivoted, aes(x = value, y = Puzzle, group = Puzzle)) +
     ) +
     xlab("") +
     scale_x_continuous(labels = function(x) ifelse(x == 40, "≥40", x))
-ggsave(file.path(output, "figure-1.png"), plot, device = "png")
+ggsave(file.path(output, "figure-1.png"), plot, device = "png", dpi=600)

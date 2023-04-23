@@ -123,5 +123,5 @@ plot3 <- ggplot(data,
     theme_classic() +
     labs(y = "Percent identity", x = "", tag = "C")
 
-ggarrange(plot1, plot2, plot3, ncol = 2, nrow = 2, legend = "bottom", common.legend = TRUE)
-ggsave(file.path(output, "figure-3.png"), device = "png")
+ggarrange(plot1, plot2, plot3, ncol = 1, nrow = 3, legend = "bottom", common.legend = TRUE)
+ggsave(file.path(output, "figure-3.png"), device = "png", dpi = 600)

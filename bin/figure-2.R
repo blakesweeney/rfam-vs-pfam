@@ -43,4 +43,4 @@ plot <- ggplot(without_predictions,
     scale_color_grey() +
     ylab("Value")
 
-ggsave(file.path(output, "figure-2.png"), plot, device = "png")
+ggsave(file.path(output, "figure-2.png"), plot, device = "png", dpi=600)
