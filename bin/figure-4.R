@@ -61,6 +61,6 @@ plot <- ggplot(rfam_structures_df,
       strip.background = element_blank(),
       strip.placement = "outside"
     ) +
-    labs(x = "Rfam RNA Type", y = "")
+    labs(x = "", y = "")
 
 ggsave(file.path(output, "figure-4.png"), plot, device = "png", dpi=600)
