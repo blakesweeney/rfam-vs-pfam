@@ -96,7 +96,7 @@ plot2 <- ggplot(data,
               aes(x = source,
                   y = median_cols,
                   label = median_cols,
-                  vjust = 1.5)) +
+                  vjust = -0.5)) +
     scale_color_manual(values = colors) +
     scale_fill_manual(values = colors) +
     theme_classic() +
