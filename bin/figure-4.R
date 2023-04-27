@@ -63,4 +63,4 @@ plot <- ggplot(rfam_structures_df,
     ) +
     labs(x = "", y = "")
 
-ggsave(file.path(output, "figure-4.png"), plot, device = "png", dpi=600)
+ggsave(file.path(output, "figure-4.png"), plot, device = "png", dpi = 600)
