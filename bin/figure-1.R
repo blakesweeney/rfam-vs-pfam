@@ -3,6 +3,7 @@
 library(tidyverse)
 library(ggridges)
 library(ggpubr)
+library(ggh4x)
 
 args <- commandArgs(trailingOnly = TRUE)
 data <- read_csv(args[1], locale = locale(decimal_mark = ","))
@@ -28,18 +29,21 @@ pivoted <- data %>%
     mutate(Metric = ifelse(Metric == "RMSD", "RMSD (Å)", Metric)) %>%
     filter(Metric %in% c("RMSD (Å)", "INF-NWC", "INF-WC")) %>%
     inner_join(counts, by = c("Puzzle")) %>%
-    mutate(Puzzle = str_c(str_pad(Puzzle, 6, "right"), "(", Length, ")"))
+    mutate(Puzzle = sprintf(" %-*s(%i)", 15 - (str_length(Puzzle) + str_length(Length)), Puzzle, Length))
 
 pivoted$Puzzle <- fct_reorder(pivoted$Puzzle, pivoted$Index)
 
-plot <- ggplot(pivoted, aes(x = value, y = Puzzle, group = Puzzle)) +
+plot <- ggplot(pivoted, aes(x = value, y = weave_factors(Puzzle, Year), group = Puzzle)) +
     geom_density_ridges(stat = "binline", bins = 50, alpha = 0.7) +
     facet_wrap(. ~ Metric, scales = "free_x", strip.position = "bottom") +
     theme_classic() +
     theme(
       strip.background = element_blank(),
-      strip.placement = "outside"
+      strip.placement = "outside",
+      axis.text.y = element_text(hjust = 0),
     ) +
     xlab("") +
+    ylab("") +
+    guides(y = "axis_nested") +
     scale_x_continuous(labels = function(x) ifelse(x == 40, "≥40", x))
 ggsave(file.path(output, "figure-1.png"), plot, device = "png", dpi=600)

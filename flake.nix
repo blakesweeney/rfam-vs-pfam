@@ -33,6 +33,7 @@
             ggbeeswarm
             ggridges
             ggpubr
+            ggh4x
           ];
         };
       in
