@@ -39,8 +39,8 @@ plot <- ggplot(without_predictions,
               data = labels,
               col = rgb(0, 0, 0)) +
     theme_classic() +
-    scale_fill_grey() +
-    scale_color_grey() +
-    ylab("Value")
+    scale_fill_grey(name = "") +
+    scale_color_grey(name = "") +
+    ylab("")
 
 ggsave(file.path(output, "figure-2.png"), plot, device = "png", dpi=600)
