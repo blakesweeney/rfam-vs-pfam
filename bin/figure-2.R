@@ -41,7 +41,7 @@ plot <- ggplot(without_predictions,
     theme_classic() +
     scale_color_grey(name = "", guide = guide_legend(title = "")) +
     ylab("") +
-    theme(legend.position = "bottom") +
+    theme(legend.position = c(0.15, 0.1)) +
     theme(legend.title = element_blank())
 
 ggsave(file.path(output, "figure-2.png"), plot, device = "png", dpi = 600)
