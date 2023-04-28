@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
 
 library(tidyverse)
+library(scales)
 
 args <- commandArgs(trailingOnly = TRUE)
 data <- read_csv(args[1])
@@ -54,12 +55,13 @@ rfam_structures_df <- rfam_summary_df %>%
 plot <- ggplot(rfam_structures_df,
                aes(x = rna_type, y = value)) +
     geom_bar(stat = "identity") +
-    facet_grid(stat ~ ., scales = "free_y", switch="both") +
+    scale_y_continuous(label = comma) +
+    facet_grid(stat ~ ., scales = "free_y", switch = "both") +
     theme_classic() +
-    theme(axis.text.x = element_text(angle = 45, vjust = 0.9, hjust = 1)) +
     theme(
-      strip.background = element_blank(),
-      strip.placement = "outside"
+        axis.text.x = element_text(angle = 45, vjust = 0.9, hjust = 1),
+          strip.background = element_blank(),
+          strip.placement = "outside",
     ) +
     labs(x = "", y = "")
 
