@@ -29,8 +29,8 @@ plot <- ggplot(without_predictions,
                aes(x = Year,
                    y = value,
                    group = interaction(`Target Kind`, `Data Type`),
-                   color = `Data Type`)) +
-    geom_line() +
+    )) +
+    geom_path(aes(linetype = `Data Type`)) +
     geom_text(aes(x = xleft,
                   y = ycenter,
                   label = `Target Kind`,
@@ -39,8 +39,9 @@ plot <- ggplot(without_predictions,
               data = labels,
               col = rgb(0, 0, 0)) +
     theme_classic() +
-    scale_fill_grey(name = "") +
-    scale_color_grey(name = "") +
-    ylab("")
+    scale_color_grey(name = "", guide = guide_legend(title = "")) +
+    ylab("") +
+    theme(legend.position = "bottom") +
+    theme(legend.title = element_blank())
 
 ggsave(file.path(output, "figure-2.png"), plot, device = "png", dpi = 600)
