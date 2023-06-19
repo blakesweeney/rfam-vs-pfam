@@ -2,6 +2,7 @@
 
 library(tidyverse)
 library(ggpubr)
+library(scales)
 
 light_rfam <- rgb(80, 29, 9, alpha = 255 * 0.5, maxColorValue = 255)
 rna_color <- rgb(80, 29, 9, maxColorValue = 255)
@@ -47,6 +48,13 @@ rna_type_df <- data %>%
         )
 rna_type_df$fraction <- rna_type_df$count / sum(rna_type_df$count)
 
+data_summary <- function(x) {
+   m <- median(x)
+   ymin <- m-sd(x)
+   ymax <- m+sd(x)
+   return(c(y=m,ymin=ymin,ymax=ymax))
+}
+
 rfam_rna_type_df <- data %>%
     filter(startsWith(source, "Rfam")) %>%
     select(rfam_acc, rna_type, number_seqs) %>%
@@ -61,65 +69,62 @@ rfam_rna_type_df <- data %>%
 
 plot1 <- ggplot(data,
                aes(x = source,
-                   y = number_seqs,
-                   color = source,
-                   fill = source)) +
-    geom_violin() +
-    scale_y_log10() +
-    geom_boxplot(width = 0.2, color = "black") +
+                   y = number_seqs)) +
+    geom_violin(fill = "grey80") +
+    stat_summary(fun.data = data_summary,
+                 geom = "pointrange",
+                 color = "black") +
     geom_text(data = medians,
               show.legend = FALSE,
               inherit.aes = FALSE,
-              col = "white",
+              col = "black",
               aes(x = source,
                   y = median_seqs,
-                  label = median_seqs,
-                  hjust = 0.5,
-                  vjust = -0.5)) +
-    scale_color_manual(values = colors) +
-    scale_fill_manual(values = colors) +
+                  label = median_seqs),
+              hjust = "left",
+              nudge_x = 0.05,
+) +
+    scale_y_log10(label = comma) +
     theme_classic() +
     labs(y = "Number of sequences", x = "", tag = "A")
 
 plot2 <- ggplot(data,
                aes(x = source,
-                   y = number_of_columns,
-                   color = source,
-                   fill = source)) +
-    geom_violin() +
-    scale_y_log10() +
-    geom_boxplot(width = 0.2, color = "black") +
+                   y = number_of_columns)) +
+    geom_violin(fill = "grey80", trim = FALSE) +
+    stat_summary(fun.data = data_summary,
+                 geom = "pointrange",
+                 color = "black") +
     geom_text(data = medians,
               show.legend = FALSE,
               inherit.aes = FALSE,
-              col = "white",
+              col = "black",
               aes(x = source,
                   y = median_cols,
-                  label = median_cols,
-                  vjust = -0.5)) +
-    scale_color_manual(values = colors) +
-    scale_fill_manual(values = colors) +
+                  label = median_cols),
+              hjust = "left",
+              nudge_x = 0.08) +
+    scale_y_log10(label = comma) +
     theme_classic() +
     labs(y = "Number of columns", x = "", tag = "B")
 
 plot3 <- ggplot(data,
                aes(x = source,
-                   y = percent_identity,
-                   color = source,
-                   fill = source)) +
-    geom_violin() +
-    geom_boxplot(width = 0.2, color = "black") +
+                   y = percent_identity)) +
+    geom_violin(fill = "grey80") +
+    stat_summary(fun.data = data_summary,
+                 geom = "pointrange",
+                 color = "black") +
     geom_text(data = medians,
               show.legend = FALSE,
               inherit.aes = FALSE,
-              col = "white",
+              col = "black",
               aes(x = source,
                   y = median_identity,
-                  label = median_identity,
-                  vjust = -0.5)) +
-    scale_color_manual(values = colors) +
-    scale_fill_manual(values = colors) +
-    scale_y_continuous(limits = c(0, 100)) +
+                  label = median_identity),
+              hjust = "left",
+              nudge_x = 0.1) +
+    scale_y_continuous(label = comma, limits = c(0, 100)) +
     theme_classic() +
     labs(y = "Percent identity", x = "", tag = "C")
 
