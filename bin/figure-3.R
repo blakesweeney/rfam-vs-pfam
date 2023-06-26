@@ -41,9 +41,9 @@ plot <- ggplot(without_predictions,
               col = rgb(0, 0, 0)) +
     theme_classic() +
     scale_color_grey(name = "", guide = guide_legend(title = "")) +
-    ylab("") +
+    ylab("Number of Groups and Targets") +
     theme(axis.text = element_text(size = 14),
-          axis.title.x = element_text(size = 16),
+          axis.title = element_text(size = 16),
           legend.position = c(0.20, 0.1),
           legend.title = element_blank(),
           legend.text = element_text(size = 14))

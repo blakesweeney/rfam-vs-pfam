@@ -21,7 +21,8 @@ data$number_of_gaps <- data$alignment_size - data$number_residues
 data$fraction_gap <- data$number_of_gaps / data$alignment_size * 100
 
 standard_theme <- theme_classic() +
-    theme(axis.text.x = element_text(size = 14))
+    theme(axis.text = element_text(size = 12),
+          axis.title.y = element_text(size = 14))
 
 pivoted <- data %>%
     pivot_longer(!rfam_acc & !description & !source & !rna_type,
