@@ -47,7 +47,7 @@ plot_puzzle_quality:
 plot_figures:
   rm -r plots/figures || true
   mkdir -p plots/figures
-  bin/figure-1.R data/puzzle-quality.csv data/puzzle-counts.tsv plots/figures
-  bin/figure-2.R data/protein-vs-rna-counts.csv plots/figures
-  bin/figure-3.R data/rfam-vs-pfam-counts.csv data/rfam.structures.csv plots/figures
-  bin/figure-4.R data/rfam-vs-pfam-counts.csv data/rfam.structures.csv plots/figures
+  bin/figure-2.R data/puzzle-quality.csv data/puzzle-counts.tsv plots/figures
+  bin/figure-3.R data/protein-vs-rna-counts.csv plots/figures
+  bin/figure-5.R data/rfam-vs-pfam-counts.csv data/rfam.structures.csv plots/figures
+  bin/figure-6.R data/rfam-vs-pfam-counts.csv data/rfam.structures.csv plots/figures
