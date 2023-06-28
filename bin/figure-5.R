@@ -85,6 +85,7 @@ plot1 <- ggplot(data,
               aes(x = source,
                   y = median_seqs,
                   label = median_seqs),
+              size = 5,
               hjust = "left",
               nudge_x = 0.05,
 ) +
@@ -106,6 +107,7 @@ plot2 <- ggplot(data,
               aes(x = source,
                   y = median_cols,
                   label = median_cols),
+              size = 5,
               hjust = "left",
               nudge_x = 0.08) +
     scale_y_log10(label = comma) +
@@ -126,6 +128,7 @@ plot3 <- ggplot(data,
               aes(x = source,
                   y = median_identity,
                   label = median_identity),
+              size = 5,
               hjust = "left",
               nudge_x = 0.1) +
     scale_y_continuous(label = comma, limits = c(0, 100)) +
