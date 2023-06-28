@@ -51,3 +51,4 @@ plot_figures:
   bin/figure-3.R data/protein-vs-rna-counts.csv plots/figures
   bin/figure-5.R data/rfam-vs-pfam-counts.csv data/rfam.structures.csv plots/figures
   bin/figure-6.R data/rfam-vs-pfam-counts.csv data/rfam.structures.csv plots/figures
+  bin/rfam-growth.R data/rfam-growth.csv plots/figures
